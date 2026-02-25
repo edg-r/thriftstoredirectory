@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PriceTier {
+  BUDGET
+  MID
+  PREMIUM
+}
+
+enum StoreStatus {
+  ACTIVE
+  HIDDEN
+  CLOSED
+}
+
+enum StoreSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MERGED_DUPLICATE
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String?           @unique
+  name             String?
+  image            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  storeSubmissions StoreSubmission[]
+}
+
+model Store {
+  id                   String            @id @default(cuid())
+  name                 String
+  slug                 String            @unique
+  description          String?
+  street1              String
+  street2              String?
+  city                 String
+  state                String            @default("CA")
+  postalCode           String?
+  county               String            @default("San Diego")
+  latitude             Decimal?          @db.Decimal(9, 6)
+  longitude            Decimal?          @db.Decimal(9, 6)
+  phone                String?
+  websiteUrl           String?
+  hoursJson            Json?
+  priceTier            PriceTier?
+  status               StoreStatus       @default(ACTIVE)
+  isUserSubmitted      Boolean           @default(false)
+  source               String?
+  sourceId             String?
+  sourceUrl            String?
+  lastSeenAt           DateTime?
+  lastVerifiedAt       DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  categories           StoreCategory[]
+  approvedSubmissions  StoreSubmission[] @relation("ApprovedStore")
+  duplicateSubmissions StoreSubmission[] @relation("DuplicateStore")
+
+  @@unique([source, sourceId])
+  @@index([city, state])
+  @@index([status])
+  @@index([latitude, longitude])
+}
+
+model Category {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  name        String
+  description String?
+  sortOrder   Int             @default(0)
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  stores      StoreCategory[]
+
+  @@index([isActive, sortOrder])
+}
+
+model StoreCategory {
+  storeId     String
+  categoryId  String
+  assignedBy  String? // import | admin | user_submission_approval
+  createdAt   DateTime @default(now())
+  store       Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([storeId, categoryId])
+  @@index([categoryId, storeId])
+}
+
+model StoreSubmission {
+  id                    String                @id @default(cuid())
+  submittedByUserId     String?
+  status                StoreSubmissionStatus @default(PENDING)
+  proposedName          String
+  proposedStreet1       String
+  proposedStreet2       String?
+  proposedCity          String
+  proposedState         String                @default("CA")
+  proposedPostalCode    String?
+  proposedLatitude      Decimal?              @db.Decimal(9, 6)
+  proposedLongitude     Decimal?              @db.Decimal(9, 6)
+  proposedPhone         String?
+  proposedWebsiteUrl    String?
+  proposedHoursJson     Json?
+  notes                 String?
+  duplicateOfStoreId    String?
+  approvedStoreId       String?
+  reviewerNotes         String?
+  reviewedAt            DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  submittedByUser       User?                 @relation(fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  duplicateOfStore      Store?                @relation("DuplicateStore", fields: [duplicateOfStoreId], references: [id], onDelete: SetNull)
+  approvedStore         Store?                @relation("ApprovedStore", fields: [approvedStoreId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([submittedByUserId])
+  @@index([duplicateOfStoreId])
+  @@index([approvedStoreId])
+}
