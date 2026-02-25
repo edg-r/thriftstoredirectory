@@ -1,20 +1,10 @@
 import { PrismaClient } from "@prisma/client";
+import { seedCategories, seedStores } from "../src/lib/seed-data";
 
 const prisma = new PrismaClient();
 
-const categories = [
-  { slug: "vintage-clothes", name: "Vintage Clothes", sortOrder: 10 },
-  { slug: "furniture", name: "Furniture", sortOrder: 20 },
-  { slug: "accessories", name: "Accessories", sortOrder: 30 },
-  { slug: "shoes", name: "Shoes", sortOrder: 40 },
-  { slug: "home-goods", name: "Home Goods", sortOrder: 50 },
-  { slug: "books", name: "Books", sortOrder: 60 },
-  { slug: "electronics", name: "Electronics", sortOrder: 70 },
-  { slug: "designer-items", name: "Designer Items", sortOrder: 80 },
-];
-
 async function main() {
-  for (const category of categories) {
+  for (const category of seedCategories) {
     await prisma.category.upsert({
       where: { slug: category.slug },
       update: {
@@ -26,7 +16,59 @@ async function main() {
     });
   }
 
-  console.log(`Seeded ${categories.length} categories`);
+  for (const store of seedStores) {
+    await prisma.store.upsert({
+      where: { slug: store.slug },
+      update: {
+        name: store.name,
+        description: store.description,
+        street1: store.street1,
+        city: store.city,
+        state: store.state,
+        postalCode: store.postalCode,
+        phone: store.phone,
+        websiteUrl: store.websiteUrl,
+        latitude: store.latitude,
+        longitude: store.longitude,
+        priceTier: store.priceTier,
+        status: "ACTIVE",
+        source: store.source,
+        sourceId: store.sourceId,
+        categories: {
+          deleteMany: {},
+          create: store.categorySlugs.map((categorySlug) => ({
+            assignedBy: "seed",
+            category: { connect: { slug: categorySlug } },
+          })),
+        },
+      },
+      create: {
+        name: store.name,
+        slug: store.slug,
+        description: store.description,
+        street1: store.street1,
+        city: store.city,
+        state: store.state,
+        postalCode: store.postalCode,
+        phone: store.phone,
+        websiteUrl: store.websiteUrl,
+        latitude: store.latitude,
+        longitude: store.longitude,
+        priceTier: store.priceTier,
+        status: "ACTIVE",
+        source: store.source,
+        sourceId: store.sourceId,
+        categories: {
+          create: store.categorySlugs.map((categorySlug) => ({
+            assignedBy: "seed",
+            category: { connect: { slug: categorySlug } },
+          })),
+        },
+      },
+    });
+  }
+
+  console.log(`Seeded ${seedCategories.length} categories and ${seedStores.length} stores`);
 }
 
 main()
