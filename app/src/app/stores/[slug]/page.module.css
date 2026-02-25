@@ -163,6 +163,162 @@
   line-height: 1.45;
 }
 
+.inlineMeta {
+  color: #5a4f46;
+  font-size: 13px;
+}
+
+.listPlain {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hoursRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(31, 26, 23, 0.06);
+  color: #4e433b;
+  font-size: 14px;
+}
+
+.hoursRow:last-child {
+  border-bottom: 0;
+}
+
+.reviewsShell {
+  margin-top: 10px;
+  display: grid;
+  gap: 14px;
+}
+
+.reviewsSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  color: #4e433b;
+  font-size: 14px;
+}
+
+.reviewsSummary p {
+  margin: 0;
+}
+
+.reviewForm {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.reviewForm label {
+  display: grid;
+  gap: 6px;
+  color: #4f4035;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reviewForm input,
+.reviewForm select,
+.reviewForm textarea {
+  border-radius: 10px;
+  border: 1px solid #d5c9bc;
+  padding: 10px 12px;
+  font: inherit;
+  background: #fff;
+}
+
+.reviewForm textarea {
+  resize: vertical;
+}
+
+.reviewForm button {
+  justify-self: start;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #1e6f5c;
+  color: #f7f4f0;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reviewForm button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.hpField {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reviewHint {
+  margin: 0;
+  color: #6a5f57;
+  font-size: 12px;
+}
+
+.reviewError,
+.reviewSuccess {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reviewError {
+  color: #8c2f2f;
+}
+
+.reviewSuccess {
+  color: #1f5a4d;
+}
+
+.reviewList {
+  display: grid;
+  gap: 10px;
+}
+
+.reviewCard {
+  border-radius: 12px;
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  padding: 12px;
+}
+
+.reviewCardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.reviewStars {
+  color: #8b4f2f;
+  letter-spacing: 0.04em;
+}
+
+.reviewDate {
+  margin: 6px 0 0;
+  color: #70645a;
+  font-size: 12px;
+}
+
+.reviewComment {
+  margin: 8px 0 0;
+  color: #433930;
+  line-height: 1.45;
+}
+
 .spanTwo {
   grid-column: 1 / -1;
 }

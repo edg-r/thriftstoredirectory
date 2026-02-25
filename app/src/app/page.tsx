@@ -18,6 +18,21 @@ function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function buildPageHref(
+  page: number,
+  values: { q: string; city: string; category: string; priceTier: string; sort: string },
+) {
+  const params = new URLSearchParams();
+  if (values.q) params.set("q", values.q);
+  if (values.city) params.set("city", values.city);
+  if (values.category) params.set("category", values.category);
+  if (values.priceTier) params.set("priceTier", values.priceTier);
+  if (values.sort) params.set("sort", values.sort);
+  if (page > 1) params.set("page", String(page));
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
 export default async function Home({ searchParams }: HomePageProps) {
   const q = firstValue(searchParams?.q)?.trim() ?? "";
   const city = firstValue(searchParams?.city)?.trim() ?? "";
@@ -48,6 +63,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
   const sourceLabel =
     storeResult.source === "database" ? "Database" : "Fallback seed data (DB offline)";
+  const queryValues = { q, city, category, priceTier, sort };
 
   return (
     <main className={styles.page}>
@@ -166,6 +182,34 @@ export default async function Home({ searchParams }: HomePageProps) {
             ))}
           </div>
         )}
+
+        <div className={styles.paginationRow}>
+          <span className={styles.paginationMeta}>
+            Page {storeResult.page} · Showing up to {storeResult.limit} per page
+          </span>
+          <div className={styles.paginationActions}>
+            {storeResult.page > 1 ? (
+              <Link
+                className={styles.paginationButton}
+                href={buildPageHref(storeResult.page - 1, queryValues)}
+              >
+                ← Previous
+              </Link>
+            ) : (
+              <span className={styles.paginationButtonDisabled}>← Previous</span>
+            )}
+            {storeResult.hasMore ? (
+              <Link
+                className={styles.paginationButton}
+                href={buildPageHref(storeResult.page + 1, queryValues)}
+              >
+                Next →
+              </Link>
+            ) : (
+              <span className={styles.paginationButtonDisabled}>Next →</span>
+            )}
+          </div>
+        </div>
       </section>
     </main>
   );

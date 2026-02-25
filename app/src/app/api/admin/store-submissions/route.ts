@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         status,
         count: submissions.length,
         limit,
-        placeholderAdminAuth: true,
+        auth: "admin-key",
       },
     });
   } catch (error) {

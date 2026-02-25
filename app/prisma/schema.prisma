@@ -63,6 +63,7 @@ model Store {
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
   categories           StoreCategory[]
+  reviews              StoreReview[]
   approvedSubmissions  StoreSubmission[] @relation("ApprovedStore")
   duplicateSubmissions StoreSubmission[] @relation("DuplicateStore")
 
@@ -70,6 +71,21 @@ model Store {
   @@index([city, state])
   @@index([status])
   @@index([latitude, longitude])
+}
+
+model StoreReview {
+  id                String   @id @default(cuid())
+  storeId           String
+  reviewerName      String?
+  rating            Int
+  comment           String?
+  sourceFingerprint String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, createdAt])
+  @@index([sourceFingerprint, createdAt])
 }
 
 model Category {

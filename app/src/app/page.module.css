@@ -74,7 +74,7 @@
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr 0.8fr 1fr auto;
   gap: 12px;
-  align-items: end;
+  align-items: flex-end;
 }
 
 .field {
@@ -142,6 +142,50 @@
 .listSection {
   max-width: 1100px;
   margin: 18px auto 0;
+}
+
+.paginationRow {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.paginationMeta {
+  color: #5f544c;
+  font-size: 13px;
+}
+
+.paginationActions {
+  display: flex;
+  gap: 8px;
+}
+
+.paginationButton,
+.paginationButtonDisabled {
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.paginationButton {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  color: #1f5a4d;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.paginationButton:hover {
+  text-decoration: underline;
+}
+
+.paginationButtonDisabled {
+  background: rgba(242, 239, 235, 0.75);
+  border: 1px dashed #d9cfc6;
+  color: #8b7d72;
 }
 
 .grid {
@@ -262,6 +306,11 @@
   .searchButton {
     width: 100%;
     grid-column: 1 / -1;
+  }
+
+  .paginationActions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 

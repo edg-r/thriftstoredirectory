@@ -1,22 +1,16 @@
-import Link from "next/link";
+import { cookies } from "next/headers";
 
+import AdminLoginGate from "./AdminLoginGate";
 import AdminStoreSubmissionsClient from "./AdminStoreSubmissionsClient";
 import styles from "./page.module.css";
 
-import { getConfiguredAdminAccessKey, isValidAdminAccessKey } from "@/lib/admin-auth";
+import {
+  ADMIN_SESSION_COOKIE,
+  getConfiguredAdminAccessKey,
+  isValidAdminAccessKey,
+} from "@/lib/admin-auth";
 
-type PageProps = {
-  searchParams?: {
-    adminKey?: string | string[];
-  };
-};
-
-function firstValue(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-export default function AdminStoreSubmissionsPage({ searchParams }: PageProps) {
-  const adminKey = firstValue(searchParams?.adminKey) ?? "";
+export default function AdminStoreSubmissionsPage() {
   const configured = getConfiguredAdminAccessKey();
 
   if (!configured) {
@@ -32,26 +26,8 @@ export default function AdminStoreSubmissionsPage({ searchParams }: PageProps) {
     );
   }
 
-  if (!isValidAdminAccessKey(adminKey)) {
-    return (
-      <main className={styles.page}>
-        <div className={styles.shell}>
-          <section className={styles.errorBox}>
-            <h1>Admin access denied</h1>
-            <p>
-              Open this page with `?adminKey=...` using the configured `ADMIN_ACCESS_KEY` value.
-            </p>
-            <p>
-              Example: <code>/admin/store-submissions?adminKey=your-key</code>
-            </p>
-            <p>
-              <Link href="/">Return to directory</Link>
-            </p>
-          </section>
-        </div>
-      </main>
-    );
-  }
+  const adminCookie = cookies().get(ADMIN_SESSION_COOKIE)?.value ?? "";
+  if (!isValidAdminAccessKey(adminCookie)) return <AdminLoginGate />;
 
-  return <AdminStoreSubmissionsClient adminKey={adminKey} />;
+  return <AdminStoreSubmissionsClient />;
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const ADMIN_KEY_QUERY_PARAM = "adminKey";
 const ADMIN_KEY_HEADER = "x-admin-key";
+export const ADMIN_SESSION_COOKIE = "tsd_admin_session";
 
 export function getConfiguredAdminAccessKey() {
   const value = process.env.ADMIN_ACCESS_KEY?.trim();
@@ -17,6 +18,7 @@ export function isValidAdminAccessKey(candidate: string | null | undefined) {
 export function extractAdminAccessKey(request: NextRequest) {
   return (
     request.headers.get(ADMIN_KEY_HEADER) ??
+    request.cookies.get(ADMIN_SESSION_COOKIE)?.value ??
     request.nextUrl.searchParams.get(ADMIN_KEY_QUERY_PARAM) ??
     null
   );

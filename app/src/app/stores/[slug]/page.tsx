@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import StoreReviewsPanel from "./StoreReviewsPanel";
 import styles from "./page.module.css";
 
-import { getStoreBySlug } from "@/lib/directory-data";
+import { getStoreBySlug, getStoreReviewsBySlug, type StoreHours, type WeekdayCode } from "@/lib/directory-data";
 
 type StoreDetailPageProps = {
   params: {
@@ -11,14 +12,107 @@ type StoreDetailPageProps = {
   };
 };
 
+const DAY_LABELS: Record<WeekdayCode, string> = {
+  SUN: "Sunday",
+  MON: "Monday",
+  TUE: "Tuesday",
+  WED: "Wednesday",
+  THU: "Thursday",
+  FRI: "Friday",
+  SAT: "Saturday",
+};
+
+function formatTime(value: string | null) {
+  if (!value) return null;
+  const [hoursRaw, minutesRaw] = value.split(":").map((part) => Number(part));
+  if (!Number.isFinite(hoursRaw) || !Number.isFinite(minutesRaw)) return value;
+  const date = new Date();
+  date.setHours(hoursRaw, minutesRaw, 0, 0);
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function getCurrentTimeParts(timezone: string | null) {
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone ?? "America/Los_Angeles",
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(new Date());
+    const weekday = parts.find((part) => part.type === "weekday")?.value;
+    const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "NaN");
+    const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "NaN");
+
+    return {
+      weekday,
+      minutes: Number.isFinite(hour) && Number.isFinite(minute) ? hour * 60 + minute : null,
+    };
+  } catch {
+    return { weekday: null, minutes: null };
+  }
+}
+
+function openNowLabel(hours: StoreHours | null) {
+  if (!hours) return null;
+
+  const weekdayMap: Record<string, WeekdayCode> = {
+    Sun: "SUN",
+    Mon: "MON",
+    Tue: "TUE",
+    Wed: "WED",
+    Thu: "THU",
+    Fri: "FRI",
+    Sat: "SAT",
+  };
+
+  const now = getCurrentTimeParts(hours.timezone);
+  const dayCode = now.weekday ? weekdayMap[now.weekday] : null;
+  if (!dayCode || now.minutes == null) return null;
+
+  const entry = hours.weekly.find((item) => item.day === dayCode);
+  if (!entry || !entry.open || !entry.close) return "Closed now";
+
+  const [openH, openM] = entry.open.split(":").map(Number);
+  const [closeH, closeM] = entry.close.split(":").map(Number);
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
+
+  return now.minutes >= openMinutes && now.minutes < closeMinutes ? "Open now" : "Closed now";
+}
+
+function formatAddressForMaps(store: {
+  street1: string;
+  street2: string | null;
+  city: string;
+  state: string;
+  postalCode: string | null;
+}) {
+  return [store.street1, store.street2, store.city, store.state, store.postalCode]
+    .filter(Boolean)
+    .join(", ");
+}
+
 export default async function StoreDetailPage({ params }: StoreDetailPageProps) {
-  const result = await getStoreBySlug(params.slug);
+  const [result, reviews] = await Promise.all([
+    getStoreBySlug(params.slug),
+    getStoreReviewsBySlug(params.slug, { limit: 20 }),
+  ]);
 
   if (!result.item) {
     notFound();
   }
 
   const store = result.item;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    formatAddressForMaps(store),
+  )}`;
+  const hoursStatus = openNowLabel(store.hours);
 
   return (
     <main className={styles.page}>
@@ -40,6 +134,7 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
           </div>
           <div className={styles.meta}>
             {store.priceTier ? <span className={styles.pill}>{store.priceTier}</span> : null}
+            {hoursStatus ? <span className={styles.pill}>{hoursStatus}</span> : null}
             <span className={styles.pillMuted}>
               {result.source === "database" ? "Database" : "Fallback seed"}
             </span>
@@ -80,6 +175,12 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
                   "Not listed"
                 )}
               </li>
+              <li>
+                <strong>Maps:</strong>{" "}
+                <a href={mapsUrl} target="_blank" rel="noreferrer">
+                  Open in Google Maps
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -95,15 +196,35 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
               <li>
                 <strong>Slug:</strong> {store.slug}
               </li>
+              <li>
+                <strong>City:</strong> {store.city}, {store.state}
+              </li>
             </ul>
           </div>
 
           <div className={styles.panel}>
             <h2>Hours</h2>
-            <p className={styles.panelText}>
-              Store hours and open-now logic will be shown here once we store normalized hours JSON
-              and add the hours parser.
-            </p>
+            {store.hours ? (
+              <>
+                {store.hours.timezone ? (
+                  <p className={styles.panelText}>Timezone: {store.hours.timezone}</p>
+                ) : null}
+                <ul className={styles.listPlain}>
+                  {store.hours.weekly.map((entry) => (
+                    <li key={entry.day} className={styles.hoursRow}>
+                      <span>{DAY_LABELS[entry.day]}</span>
+                      <span>
+                        {entry.open && entry.close
+                          ? `${formatTime(entry.open)} - ${formatTime(entry.close)}`
+                          : "Closed"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className={styles.panelText}>Hours not listed yet.</p>
+            )}
             <p className={styles.panelText}>
               Spot missing or outdated info?{" "}
               <Link href="/submit-store" className={styles.inlineLink}>
@@ -112,26 +233,19 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
             </p>
           </div>
 
-          <div className={styles.panel}>
-            <h2>Next MVP Items</h2>
-            <ul className={styles.list}>
-              <li>Reviews and photo gallery</li>
-              <li>User store submission link / duplicate handling</li>
-              <li>Moderated edits and community contributions</li>
-            </ul>
-          </div>
-
           <div className={`${styles.panel} ${styles.spanTwo}`}>
             <div className={styles.panelHeader}>
               <h2>Reviews</h2>
-              <Link href={`/api/stores/${store.slug}/reviews`} className={styles.inlineLink}>
-                API placeholder
-              </Link>
+              <span className={styles.inlineMeta}>
+                {reviews.count} total · {reviews.averageRating != null ? `${reviews.averageRating}/5 avg` : "No rating yet"}
+              </span>
             </div>
-            <p className={styles.panelText}>
-              Reviews are not enabled yet. The endpoint is in place and currently returns an empty
-              list so we can build the UI shell before adding the reviews table and write APIs.
-            </p>
+            <StoreReviewsPanel
+              slug={store.slug}
+              initialReviews={reviews.items}
+              initialCount={reviews.count}
+              initialAverageRating={reviews.averageRating}
+            />
           </div>
         </section>
       </div>

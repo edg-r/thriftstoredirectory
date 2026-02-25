@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Thrift Store Directory (MVP)
 
-## Getting Started
+Next.js + Prisma app for a San Diego County thrift store directory with:
 
-First, run the development server:
+- Public browse/search/filter directory
+- Store detail pages
+- Community store submissions (moderated)
+- Admin moderation queue (approve / reject / mark duplicate)
+- Store reviews with anti-spam rate limiting
+- Fallback seed data when the database is offline (read paths only)
+
+## Tech Stack
+
+- Next.js 14 (App Router)
+- TypeScript
+- Prisma + PostgreSQL
+- React 18
+
+## Local Setup
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Copy env file and fill required values
+
+```bash
+cp .env.example .env
+```
+
+Required for full MVP behavior:
+
+- `DATABASE_URL`
+- `ADMIN_ACCESS_KEY`
+- `REQUEST_FINGERPRINT_SALT`
+
+3. Run Prisma migration(s)
+
+```bash
+npm run prisma:migrate:dev -- --name init
+```
+
+If the DB already exists and migrations are in the repo, use normal Prisma migrate commands as appropriate for your environment.
+
+4. Seed starter data
+
+```bash
+npm run db:seed
+```
+
+5. Start the app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Admin Moderation (MVP)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Open `/admin/store-submissions`
+2. Enter the `ADMIN_ACCESS_KEY`
+3. The app creates an HttpOnly admin session cookie
+4. Review pending submissions and approve / reject / mark duplicate
 
-## Learn More
+## Public Flows to Test
 
-To learn more about Next.js, take a look at the following resources:
+1. Directory search/filter on `/`
+2. Store detail page `/stores/[slug]`
+3. Submit store on `/submit-store`
+4. Approve submission in admin
+5. Confirm approved store appears in directory and detail page
+6. Add a review on a store detail page
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Security / Abuse Controls Included (MVP)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Admin key is stored in an HttpOnly session cookie (no URL query required)
+- Admin API endpoints require admin auth
+- Submission API rate limiting (IP-based, in-memory)
+- Reviews API rate limiting (IP-based, in-memory)
+- Honeypot fields on public forms
+- Review duplicate suppression (fingerprint-based, 24h window)
+- Input validation for URL, ZIP, state, lat/lng
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- The app uses seed-data fallback for directory reads if Postgres is unavailable.
+- Writes (submissions, reviews, admin moderation) require a working database.
+- `next build` may log Prisma connection errors during static generation if Postgres is offline, but the build still completes because read paths fall back to seed data.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Useful Commands
+
+```bash
+npm run lint
+npm run build
+npm run prisma:generate
+npm run db:seed
+```

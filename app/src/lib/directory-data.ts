@@ -41,6 +41,19 @@ export type StoreListResult = {
   source: "database" | "fallback";
 };
 
+export type WeekdayCode = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
+
+export type StoreHoursEntry = {
+  day: WeekdayCode;
+  open: string | null;
+  close: string | null;
+};
+
+export type StoreHours = {
+  timezone: string | null;
+  weekly: StoreHoursEntry[];
+};
+
 export type StoreDetailItem = {
   id: string;
   name: string;
@@ -57,12 +70,79 @@ export type StoreDetailItem = {
   latitude: number | null;
   longitude: number | null;
   categoryNames: string[];
+  hours: StoreHours | null;
 };
+
+export type StoreReviewItem = {
+  id: string;
+  reviewerName: string | null;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+};
+
+export type StoreReviewResult = {
+  items: StoreReviewItem[];
+  count: number;
+  averageRating: number | null;
+  source: "database" | "fallback";
+};
+
+const VALID_DAYS: WeekdayCode[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 function mapCategoryNames(categorySlugs: string[]) {
   return categorySlugs
     .map((slug) => seedCategories.find((category) => category.slug === slug)?.name)
-    .filter((value): value is string => Boolean(value));
+    .filter(Boolean) as string[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function normalizeTime(value: unknown) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(trimmed)) return null;
+  return trimmed;
+}
+
+function normalizeDay(value: unknown): WeekdayCode | null {
+  return typeof value === "string" && (VALID_DAYS as string[]).includes(value)
+    ? (value as WeekdayCode)
+    : null;
+}
+
+function normalizeHoursJson(value: unknown): StoreHours | null {
+  if (!isRecord(value)) return null;
+
+  const weeklyRaw = value.weekly;
+  if (!Array.isArray(weeklyRaw)) return null;
+
+  const weekly = weeklyRaw
+    .map((entry) => {
+      if (!isRecord(entry)) return null;
+      const day = normalizeDay(entry.day);
+      if (!day) return null;
+      return {
+        day,
+        open: normalizeTime(entry.open),
+        close: normalizeTime(entry.close),
+      } satisfies StoreHoursEntry;
+    })
+    .filter((entry): entry is StoreHoursEntry => Boolean(entry));
+
+  if (weekly.length === 0) return null;
+
+  const byDay = new Map(weekly.map((entry) => [entry.day, entry]));
+  const orderedWeekly = VALID_DAYS.map(
+    (day) => byDay.get(day) ?? { day, open: null, close: null },
+  );
+
+  return {
+    timezone: typeof value.timezone === "string" && value.timezone.trim() ? value.timezone : null,
+    weekly: orderedWeekly,
+  };
 }
 
 export async function getCategories(): Promise<{
@@ -250,6 +330,7 @@ export async function getStoreBySlug(slug: string): Promise<{
         postalCode: true,
         phone: true,
         websiteUrl: true,
+        hoursJson: true,
         priceTier: true,
         latitude: true,
         longitude: true,
@@ -285,6 +366,7 @@ export async function getStoreBySlug(slug: string): Promise<{
         latitude: store.latitude ? Number(store.latitude) : null,
         longitude: store.longitude ? Number(store.longitude) : null,
         categoryNames: store.categories.map((item) => item.category.name),
+        hours: normalizeHoursJson(store.hoursJson),
       },
     };
   } catch {
@@ -311,7 +393,64 @@ export async function getStoreBySlug(slug: string): Promise<{
         latitude: store.latitude ?? null,
         longitude: store.longitude ?? null,
         categoryNames: mapCategoryNames(store.categorySlugs),
+        hours: normalizeHoursJson(store.hoursJson),
       },
     };
+  }
+}
+
+export async function getStoreReviewsBySlug(
+  slug: string,
+  options?: { limit?: number },
+): Promise<StoreReviewResult> {
+  const limit = Math.min(50, Math.max(1, options?.limit ?? 20));
+
+  try {
+    const store = await prisma.store.findFirst({
+      where: { slug, status: "ACTIVE" },
+      select: { id: true },
+    });
+
+    if (!store) {
+      return { items: [], count: 0, averageRating: null, source: "database" };
+    }
+
+    const [reviews, aggregate] = await Promise.all([
+      prisma.storeReview.findMany({
+        where: { storeId: store.id },
+        orderBy: [{ createdAt: "desc" }],
+        take: limit,
+        select: {
+          id: true,
+          reviewerName: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+        },
+      }),
+      prisma.storeReview.aggregate({
+        where: { storeId: store.id },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+    ]);
+
+    return {
+      items: reviews.map((review) => ({
+        id: review.id,
+        reviewerName: review.reviewerName,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt.toISOString(),
+      })),
+      count: aggregate._count._all,
+      averageRating:
+        typeof aggregate._avg.rating === "number"
+          ? Number(aggregate._avg.rating.toFixed(1))
+          : null,
+      source: "database",
+    };
+  } catch {
+    return { items: [], count: 0, averageRating: null, source: "fallback" };
   }
 }

@@ -58,10 +58,25 @@
   font-weight: 600;
 }
 
+.linkButton {
+  border: 0;
+  background: transparent;
+  color: #1f5a4d;
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
 .toolbar {
   display: flex;
   gap: 12px;
-  align-items: end;
+  align-items: flex-end;
   flex-wrap: wrap;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.86);
@@ -110,6 +125,45 @@
   border-style: solid;
   border-color: #d18a8a;
   color: #7c2424;
+}
+
+.adminLoginForm {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+}
+
+.adminLoginForm label {
+  display: grid;
+  gap: 6px;
+  color: #4f4035;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.adminLoginForm input {
+  border-radius: 10px;
+  border: 1px solid #d5c9bc;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.adminLoginForm button {
+  justify-self: start;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #1e6f5c;
+  color: #f7f4f0;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loginError {
+  margin: 10px 0 0;
+  color: #8c2f2f;
+  font-weight: 600;
 }
 
 .card {

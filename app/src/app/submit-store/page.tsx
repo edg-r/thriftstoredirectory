@@ -69,6 +69,13 @@ export default function SubmitStorePage() {
         </div>
 
         <form className={styles.form} onSubmit={onSubmit}>
+          <input
+            name="company"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+          />
           <label>
             <span>Store name *</span>
             <input name="name" required placeholder="Example Thrift Co." />
@@ -122,8 +129,7 @@ export default function SubmitStorePage() {
         <section className={styles.resultPanel} aria-live="polite">
           <h2>Submission response</h2>
           <p className={styles.resultHint}>
-            Auth is not enforced yet in this placeholder stage. Real user identity and moderation
-            workflow come next.
+            Submissions are saved as pending for admin review before they appear in the directory.
           </p>
           <pre>{result ? JSON.stringify(result, null, 2) : "Submit the form to test the API."}</pre>
         </section>

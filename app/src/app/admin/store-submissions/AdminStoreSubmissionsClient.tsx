@@ -30,11 +30,7 @@ type ListResponse = {
 
 const statusOptions = ["PENDING", "APPROVED", "REJECTED", "MERGED_DUPLICATE"] as const;
 
-type Props = {
-  adminKey: string;
-};
-
-export default function AdminStoreSubmissionsClient({ adminKey }: Props) {
+export default function AdminStoreSubmissionsClient() {
   const [statusFilter, setStatusFilter] = useState<(typeof statusOptions)[number]>("PENDING");
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -49,9 +45,7 @@ export default function AdminStoreSubmissionsClient({ adminKey }: Props) {
     try {
       const response = await fetch(
         `/api/admin/store-submissions?status=${encodeURIComponent(nextStatus)}&limit=50`,
-        {
-          headers: { "x-admin-key": adminKey },
-        },
+        {},
       );
       const data = (await response.json()) as ListResponse | { error?: string };
 
@@ -85,10 +79,10 @@ export default function AdminStoreSubmissionsClient({ adminKey }: Props) {
 
     const reviewerNotes =
       action === "reject"
-        ? "Rejected in placeholder admin UI"
+        ? "Rejected in admin UI"
         : action === "merge_duplicate"
-          ? "Marked duplicate in placeholder admin UI"
-          : "Approved in placeholder admin UI";
+          ? "Marked duplicate in admin UI"
+          : "Approved in admin UI";
 
     const payload: Record<string, string> = { action, reviewerNotes };
     if (action === "merge_duplicate" && submission.duplicateOfStoreId) {
@@ -100,7 +94,6 @@ export default function AdminStoreSubmissionsClient({ adminKey }: Props) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-key": adminKey,
         },
         body: JSON.stringify(payload),
       });
@@ -119,12 +112,17 @@ export default function AdminStoreSubmissionsClient({ adminKey }: Props) {
     }
   }
 
+  async function signOut() {
+    await fetch("/api/admin/session", { method: "DELETE" });
+    window.location.reload();
+  }
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
         <header className={styles.header}>
           <div>
-            <p className={styles.eyebrow}>Admin (Placeholder)</p>
+            <p className={styles.eyebrow}>Admin</p>
             <h1>Store submissions moderation</h1>
             <p className={styles.subtitle}>
               Review pending community-submitted stores and approve, reject, or mark duplicates.
@@ -133,6 +131,9 @@ export default function AdminStoreSubmissionsClient({ adminKey }: Props) {
           <div className={styles.headerLinks}>
             <Link href="/submit-store">Submit test store</Link>
             <Link href="/">Directory</Link>
+            <button type="button" className={styles.linkButton} onClick={signOut}>
+              Sign out
+            </button>
           </div>
         </header>
 

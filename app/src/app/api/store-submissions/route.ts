@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getClientIpFromHeaders } from "@/lib/request-meta";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 
 type StoreSubmissionPayload = {
@@ -14,6 +16,7 @@ type StoreSubmissionPayload = {
   notes?: unknown;
   latitude?: unknown;
   longitude?: unknown;
+  company?: unknown; // honeypot
 };
 
 function asTrimmedString(value: unknown) {
@@ -32,6 +35,10 @@ function asOptionalNumber(value: unknown) {
   if (value == null || value === "") return null;
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isLikelyPostalCode(value: string) {
+  return /^\d{5}(-\d{4})?$/.test(value);
 }
 
 function normalizeForComparison(value: string) {
@@ -55,6 +62,22 @@ async function parseBody(request: NextRequest): Promise<StoreSubmissionPayload> 
 
 export async function POST(request: NextRequest) {
   const body = await parseBody(request);
+  const clientIp = getClientIpFromHeaders(request.headers);
+  const rateLimit = checkRateLimit({
+    key: `store-submission:${clientIp}`,
+    limit: 5,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    return NextResponse.json(
+      { error: "Too many submissions. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
 
   const name = asTrimmedString(body.name);
   const street1 = asTrimmedString(body.street1);
@@ -67,14 +90,37 @@ export async function POST(request: NextRequest) {
   const notes = asOptionalString(body.notes);
   const latitude = asOptionalNumber(body.latitude);
   const longitude = asOptionalNumber(body.longitude);
+  const company = asOptionalString(body.company);
 
   const fieldErrors: Record<string, string> = {};
 
+  if (company) {
+    return NextResponse.json({ error: "Submission rejected" }, { status: 400 });
+  }
   if (!name) fieldErrors.name = "Name is required";
   if (!street1) fieldErrors.street1 = "Street address is required";
   if (!city) fieldErrors.city = "City is required";
-  if (websiteUrl && !/^https?:\/\//i.test(websiteUrl)) {
-    fieldErrors.websiteUrl = "Website URL must start with http:// or https://";
+  if (state && !/^[A-Za-z]{2}$/.test(state)) {
+    fieldErrors.state = "State must be a 2-letter code";
+  }
+  if (postalCode && !isLikelyPostalCode(postalCode)) {
+    fieldErrors.postalCode = "ZIP must be 5 digits (optional +4)";
+  }
+  if (websiteUrl) {
+    try {
+      const parsed = new URL(websiteUrl);
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        fieldErrors.websiteUrl = "Website URL must use http or https";
+      }
+    } catch {
+      fieldErrors.websiteUrl = "Website URL must be a valid URL";
+    }
+  }
+  if (latitude != null && (latitude < -90 || latitude > 90)) {
+    fieldErrors.latitude = "Latitude must be between -90 and 90";
+  }
+  if (longitude != null && (longitude < -180 || longitude > 180)) {
+    fieldErrors.longitude = "Longitude must be between -180 and 180";
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -82,20 +128,25 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const normalizedName = normalizeForComparison(name);
-    const normalizedStreet = normalizeForComparison(street1);
-    const normalizedCity = normalizeForComparison(city);
+    const safeName = name!;
+    const safeStreet1 = street1!;
+    const safeCity = city!;
+    const safeState = state.toUpperCase();
+
+    const normalizedName = normalizeForComparison(safeName);
+    const normalizedStreet = normalizeForComparison(safeStreet1);
+    const normalizedCity = normalizeForComparison(safeCity);
 
     const duplicate = await prisma.store.findFirst({
       where: {
         status: "ACTIVE",
-        city: { equals: city, mode: "insensitive" },
+        city: { equals: safeCity, mode: "insensitive" },
         OR: [
-          { slug: normalizeForComparison(name).replace(/\s+/g, "-") },
+          { slug: normalizeForComparison(safeName).replace(/\s+/g, "-") },
           {
             AND: [
-              { name: { equals: name, mode: "insensitive" } },
-              { street1: { equals: street1, mode: "insensitive" } },
+              { name: { equals: safeName, mode: "insensitive" } },
+              { street1: { equals: safeStreet1, mode: "insensitive" } },
             ],
           },
         ],
@@ -108,7 +159,7 @@ export async function POST(request: NextRequest) {
         {
           error: "Possible duplicate store",
           duplicate,
-          meta: { duplicateCheck: "exact-name-address-or-slug", placeholder: true },
+          meta: { duplicateCheck: "exact-name-address-or-slug" },
         },
         { status: 409 },
       );
@@ -117,7 +168,7 @@ export async function POST(request: NextRequest) {
     const fuzzyCandidates = await prisma.store.findMany({
       where: {
         status: "ACTIVE",
-        city: { equals: city, mode: "insensitive" },
+        city: { equals: safeCity, mode: "insensitive" },
       },
       select: { id: true, slug: true, name: true, street1: true, city: true },
       take: 10,
@@ -136,11 +187,11 @@ export async function POST(request: NextRequest) {
 
     const submission = await prisma.storeSubmission.create({
       data: {
-        proposedName: name,
-        proposedStreet1: street1,
+        proposedName: safeName,
+        proposedStreet1: safeStreet1,
         proposedStreet2: street2,
-        proposedCity: city,
-        proposedState: state,
+        proposedCity: safeCity,
+        proposedState: safeState,
         proposedPostalCode: postalCode,
         proposedPhone: phone,
         proposedWebsiteUrl: websiteUrl,
@@ -164,7 +215,7 @@ export async function POST(request: NextRequest) {
       {
         submission,
         meta: {
-          placeholderAuth: true,
+          auth: "anonymous",
           duplicateCheck: fuzzyMatch ? "fuzzy-flagged" : "none",
         },
       },

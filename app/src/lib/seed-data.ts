@@ -23,6 +23,14 @@ export type SeedStore = {
   priceTier?: "BUDGET" | "MID" | "PREMIUM";
   latitude?: number;
   longitude?: number;
+  hoursJson?: {
+    timezone?: string;
+    weekly: Array<{
+      day: "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
+      open: string | null;
+      close: string | null;
+    }>;
+  };
   source?: string;
   sourceId?: string;
 };
@@ -42,6 +50,18 @@ export const seedStores: SeedStore[] = [
     priceTier: "BUDGET",
     latitude: 32.8276,
     longitude: -117.1513,
+    hoursJson: {
+      timezone: "America/Los_Angeles",
+      weekly: [
+        { day: "SUN", open: "10:00", close: "18:00" },
+        { day: "MON", open: "09:00", close: "20:00" },
+        { day: "TUE", open: "09:00", close: "20:00" },
+        { day: "WED", open: "09:00", close: "20:00" },
+        { day: "THU", open: "09:00", close: "20:00" },
+        { day: "FRI", open: "09:00", close: "20:00" },
+        { day: "SAT", open: "09:00", close: "20:00" },
+      ],
+    },
     source: "curated_seed",
     sourceId: "seed-001",
   },
@@ -58,6 +78,18 @@ export const seedStores: SeedStore[] = [
     priceTier: "BUDGET",
     latitude: 32.7558,
     longitude: -117.2107,
+    hoursJson: {
+      timezone: "America/Los_Angeles",
+      weekly: [
+        { day: "SUN", open: "10:00", close: "17:00" },
+        { day: "MON", open: "10:00", close: "18:00" },
+        { day: "TUE", open: "10:00", close: "18:00" },
+        { day: "WED", open: "10:00", close: "18:00" },
+        { day: "THU", open: "10:00", close: "18:00" },
+        { day: "FRI", open: "10:00", close: "18:00" },
+        { day: "SAT", open: "10:00", close: "18:00" },
+      ],
+    },
     source: "curated_seed",
     sourceId: "seed-002",
   },
@@ -74,6 +106,18 @@ export const seedStores: SeedStore[] = [
     priceTier: "BUDGET",
     latitude: 33.2074,
     longitude: -117.3858,
+    hoursJson: {
+      timezone: "America/Los_Angeles",
+      weekly: [
+        { day: "SUN", open: "10:00", close: "17:00" },
+        { day: "MON", open: "09:00", close: "19:00" },
+        { day: "TUE", open: "09:00", close: "19:00" },
+        { day: "WED", open: "09:00", close: "19:00" },
+        { day: "THU", open: "09:00", close: "19:00" },
+        { day: "FRI", open: "09:00", close: "19:00" },
+        { day: "SAT", open: "09:00", close: "19:00" },
+      ],
+    },
     source: "curated_seed",
     sourceId: "seed-003",
   },
@@ -91,6 +135,18 @@ export const seedStores: SeedStore[] = [
     priceTier: "MID",
     latitude: 32.7571,
     longitude: -117.2126,
+    hoursJson: {
+      timezone: "America/Los_Angeles",
+      weekly: [
+        { day: "SUN", open: "11:00", close: "18:00" },
+        { day: "MON", open: "10:00", close: "18:00" },
+        { day: "TUE", open: "10:00", close: "18:00" },
+        { day: "WED", open: "10:00", close: "18:00" },
+        { day: "THU", open: "10:00", close: "18:00" },
+        { day: "FRI", open: "10:00", close: "18:00" },
+        { day: "SAT", open: "10:00", close: "18:00" },
+      ],
+    },
     source: "curated_seed",
     sourceId: "seed-004",
   },
