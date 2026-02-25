@@ -8,6 +8,7 @@ MVP thrift store directory for San Diego County, built as a responsive web app f
 - Filter/sort by category, price tier, open now, and location.
 - Show store details, reviews, and user-uploaded photos.
 - Allow authenticated users to post reviews/photos (Google Sign-In).
+- Allow authenticated users to submit new thrift stores they find (pending moderation).
 - Provide basic admin tools for metadata editing, imports, and moderation.
 
 ## Scope
@@ -20,6 +21,7 @@ MVP thrift store directory for San Diego County, built as a responsive web app f
 - Google Sign-In auth
 - Reviews (1-5 stars + text)
 - Review photo uploads
+- User-submitted store suggestions (create flow + moderation)
 - Manual moderation
 - Admin editing for categories and price tiers
 - Seed import pipeline for store data
@@ -53,6 +55,7 @@ MVP thrift store directory for San Diego County, built as a responsive web app f
 
 ### Authenticated User
 
+- Submit a new store listing/suggestion (name, location, optional metadata)
 - Submit review (rating + text + photos)
 - Report review/photo
 - Edit/delete own review (recommended if time allows)
@@ -60,6 +63,7 @@ MVP thrift store directory for San Diego County, built as a responsive web app f
 ### Admin
 
 - Store import trigger and import status
+- Review/approve/reject user-submitted store listings
 - Edit store metadata, categories, and price tier
 - Moderation queue for flagged reviews/photos
 - Hide/restore content and manage invalid/duplicate stores
@@ -75,6 +79,7 @@ MVP thrift store directory for San Diego County, built as a responsive web app f
 
 ### Authenticated
 
+- `POST /api/store-submissions` (or `POST /api/stores` with moderation workflow)
 - `POST /api/reviews`
 - `PATCH /api/reviews/:id` (recommended)
 - `DELETE /api/reviews/:id` (recommended)
@@ -85,6 +90,8 @@ MVP thrift store directory for San Diego County, built as a responsive web app f
 
 - `PATCH /api/admin/stores/:id`
 - `POST /api/admin/import-stores`
+- `GET /api/admin/store-submissions`
+- `PATCH /api/admin/store-submissions/:id`
 - `GET /api/admin/moderation`
 - `PATCH /api/admin/moderation/:targetType/:targetId`
 
@@ -99,6 +106,7 @@ Core tables/enums expected for MVP:
 - `reviews`
 - `reviewPhotos`
 - `contentReports`
+- `storeSubmissions` (recommended)
 - Optional: `userFavorites`
 
 ## Import Pipeline Notes
@@ -107,6 +115,8 @@ Core tables/enums expected for MVP:
 - Import seed fields: name, address, lat/lng, opening hours, phone, website, external source id.
 - Use upsert logic to reduce duplicates.
 - Allow manual enrichment after import (categories, price tier, notes).
+- Treat imported data as a bootstrap source only; first-party curation and user-submitted stores should be primary long-term data growth paths.
+- Do not rely on Google Maps/Google Reviews as a required runtime dependency for app data.
 
 ## Functional / Non-Functional Requirements (Summary)
 
@@ -145,6 +155,6 @@ Exact names may change during implementation, but expect values for:
 
 1. Foundation: scaffold app, Prisma/Postgres, schema, migrations, categories seed, Google auth
 2. Directory core: list/detail APIs, directory UI, filters/sort, open-now logic
-3. Community: reviews, photo uploads, gallery
-4. Admin: metadata editing, import integration, moderation queue/actions
+3. Community: store submissions, reviews, photo uploads, gallery
+4. Admin: metadata editing, submission moderation, import integration, moderation queue/actions
 5. Cleanup: validation, error states, docs/setup polish
