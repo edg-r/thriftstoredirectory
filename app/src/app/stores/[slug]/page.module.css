@@ -1,0 +1,159 @@
+.page {
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(30, 111, 92, 0.12), transparent 40%),
+    radial-gradient(circle at 15% 0%, rgba(255, 150, 80, 0.12), transparent 35%),
+    #f6f1e8;
+  color: #1f1a17;
+}
+
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: #3d6459;
+  font-weight: 600;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 12px 30px rgba(31, 26, 23, 0.05);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7f5a3c;
+  font-weight: 700;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.address {
+  margin: 10px 0 0;
+  color: #574b42;
+  line-height: 1.35;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.pill,
+.pillMuted {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.pill {
+  background: #efe6da;
+  color: #6a4d37;
+}
+
+.pillMuted {
+  background: #eef4f2;
+  color: #3d6459;
+}
+
+.description {
+  margin: 14px 0 0;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  line-height: 1.45;
+  color: #40362f;
+}
+
+.grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.panel {
+  border-radius: 14px;
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 16px;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.chips {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip,
+.chipMuted {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 6px 9px;
+}
+
+.chip {
+  background: #edf5f2;
+  border: 1px solid #d5e8e3;
+  color: #1f5a4d;
+}
+
+.chipMuted {
+  background: #f2efeb;
+  border: 1px dashed #d9cfc6;
+  color: #7b6f66;
+}
+
+.list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: #4e433b;
+  line-height: 1.5;
+}
+
+.list a {
+  color: #1f5a4d;
+}
+
+@media (max-width: 800px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .meta {
+    justify-content: flex-start;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

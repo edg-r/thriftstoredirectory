@@ -9,12 +9,31 @@ function parsePositiveInt(value: string | null, fallback: number) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function parsePriceTier(value: string | null) {
+  if (value === "BUDGET" || value === "MID" || value === "PREMIUM") {
+    return value;
+  }
+
+  return undefined;
+}
+
+function parseSort(value: string | null) {
+  if (value === "name_asc" || value === "name_desc" || value === "city_asc" || value === "city_desc") {
+    return value;
+  }
+
+  return undefined;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
   const result = await getStores({
     q: searchParams.get("q") ?? undefined,
     city: searchParams.get("city") ?? undefined,
+    category: searchParams.get("category") ?? undefined,
+    priceTier: parsePriceTier(searchParams.get("priceTier")),
+    sort: parseSort(searchParams.get("sort")),
     page: parsePositiveInt(searchParams.get("page"), 1),
     limit: parsePositiveInt(searchParams.get("limit"), 12),
   });

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./page.module.css";
 
 import { getCategories, getStores } from "@/lib/directory-data";
@@ -6,6 +7,9 @@ type HomePageProps = {
   searchParams?: {
     q?: string | string[];
     city?: string | string[];
+    category?: string | string[];
+    priceTier?: string | string[];
+    sort?: string | string[];
     page?: string | string[];
   };
 };
@@ -17,6 +21,9 @@ function firstValue(value: string | string[] | undefined) {
 export default async function Home({ searchParams }: HomePageProps) {
   const q = firstValue(searchParams?.q)?.trim() ?? "";
   const city = firstValue(searchParams?.city)?.trim() ?? "";
+  const category = firstValue(searchParams?.category)?.trim() ?? "";
+  const priceTier = firstValue(searchParams?.priceTier)?.trim() ?? "";
+  const sort = firstValue(searchParams?.sort)?.trim() ?? "city_asc";
   const page = Number.parseInt(firstValue(searchParams?.page) ?? "1", 10);
   const safePage = Number.isFinite(page) && page > 0 ? page : 1;
 
@@ -25,6 +32,15 @@ export default async function Home({ searchParams }: HomePageProps) {
     getStores({
       q: q || undefined,
       city: city || undefined,
+      category: category || undefined,
+      priceTier:
+        priceTier === "BUDGET" || priceTier === "MID" || priceTier === "PREMIUM"
+          ? priceTier
+          : undefined,
+      sort:
+        sort === "name_asc" || sort === "name_desc" || sort === "city_asc" || sort === "city_desc"
+          ? sort
+          : undefined,
       page: safePage,
       limit: 12,
     }),
@@ -57,6 +73,35 @@ export default async function Home({ searchParams }: HomePageProps) {
             <span>City</span>
             <input type="text" name="city" defaultValue={city} placeholder="San Diego" />
           </label>
+          <label className={styles.field}>
+            <span>Category</span>
+            <select name="category" defaultValue={category}>
+              <option value="">All categories</option>
+              {categoryResult.items.map((item) => (
+                <option key={item.id} value={item.slug}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={styles.field}>
+            <span>Price tier</span>
+            <select name="priceTier" defaultValue={priceTier}>
+              <option value="">Any</option>
+              <option value="BUDGET">Budget</option>
+              <option value="MID">Mid</option>
+              <option value="PREMIUM">Premium</option>
+            </select>
+          </label>
+          <label className={styles.field}>
+            <span>Sort</span>
+            <select name="sort" defaultValue={sort}>
+              <option value="city_asc">City (A-Z)</option>
+              <option value="city_desc">City (Z-A)</option>
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="name_desc">Name (Z-A)</option>
+            </select>
+          </label>
           <button className={styles.searchButton} type="submit">
             Search
           </button>
@@ -88,7 +133,9 @@ export default async function Home({ searchParams }: HomePageProps) {
             {storeResult.items.map((store) => (
               <article className={styles.card} key={store.id}>
                 <div className={styles.cardHeader}>
-                  <h2>{store.name}</h2>
+                  <h2>
+                    <Link href={`/stores/${store.slug}`}>{store.name}</Link>
+                  </h2>
                   {store.priceTier ? <span className={styles.priceTier}>{store.priceTier}</span> : null}
                 </div>
                 <p className={styles.address}>
@@ -105,7 +152,9 @@ export default async function Home({ searchParams }: HomePageProps) {
                     <span className={styles.cardChipMuted}>Uncategorized</span>
                   )}
                 </div>
-                <p className={styles.slug}>/{store.slug}</p>
+                <p className={styles.slug}>
+                  <Link href={`/stores/${store.slug}`}>/stores/{store.slug}</Link>
+                </p>
               </article>
             ))}
           </div>

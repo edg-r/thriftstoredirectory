@@ -44,7 +44,7 @@
 .searchForm {
   margin-top: 22px;
   display: grid;
-  grid-template-columns: 1.2fr 1fr auto;
+  grid-template-columns: 1.2fr 1fr 1fr 0.8fr 1fr auto;
   gap: 12px;
   align-items: end;
 }
@@ -57,7 +57,8 @@
   color: #4f4035;
 }
 
-.field input {
+.field input,
+.field select {
   width: 100%;
   border-radius: 12px;
   border: 1px solid #d5c9bc;
@@ -142,6 +143,14 @@
   line-height: 1.2;
 }
 
+.cardHeader h2 a {
+  text-decoration: none;
+}
+
+.cardHeader h2 a:hover {
+  text-decoration: underline;
+}
+
 .priceTier {
   flex-shrink: 0;
   font-size: 11px;
@@ -192,6 +201,10 @@
   font-size: 12px;
 }
 
+.slug a:hover {
+  text-decoration: underline;
+}
+
 .emptyState {
   border-radius: 16px;
   border: 1px dashed rgba(31, 26, 23, 0.18);
@@ -215,11 +228,12 @@
   }
 
   .searchForm {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .searchButton {
     width: 100%;
+    grid-column: 1 / -1;
   }
 }
 
@@ -234,6 +248,10 @@
   }
 
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .searchForm {
     grid-template-columns: 1fr;
   }
 }
