@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { requireAdminApiAccess } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 type ActionPayload = {
@@ -49,6 +50,9 @@ async function parseBody(request: NextRequest): Promise<ActionPayload> {
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const authError = requireAdminApiAccess(request);
+  if (authError) return authError;
+
   const body = await parseBody(request);
   const action = asOptionalString(body.action);
   const reviewerNotes = asOptionalString(body.reviewerNotes);

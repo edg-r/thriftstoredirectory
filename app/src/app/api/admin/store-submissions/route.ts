@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { requireAdminApiAccess } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 function parsePositiveInt(value: string | null, fallback: number) {
@@ -22,6 +23,9 @@ function parseStatus(value: string | null) {
 }
 
 export async function GET(request: NextRequest) {
+  const authError = requireAdminApiAccess(request);
+  if (authError) return authError;
+
   const { searchParams } = new URL(request.url);
   const status = parseStatus(searchParams.get("status")) ?? "PENDING";
   const limit = Math.min(100, parsePositiveInt(searchParams.get("limit"), 25));
