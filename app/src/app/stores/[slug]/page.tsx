@@ -99,12 +99,39 @@ export default async function StoreDetailPage({ params }: StoreDetailPageProps) 
           </div>
 
           <div className={styles.panel}>
+            <h2>Hours</h2>
+            <p className={styles.panelText}>
+              Store hours and open-now logic will be shown here once we store normalized hours JSON
+              and add the hours parser.
+            </p>
+            <p className={styles.panelText}>
+              Spot missing or outdated info?{" "}
+              <Link href="/submit-store" className={styles.inlineLink}>
+                Submit a new store / correction
+              </Link>
+            </p>
+          </div>
+
+          <div className={styles.panel}>
             <h2>Next MVP Items</h2>
             <ul className={styles.list}>
-              <li>Opening hours display + open-now status</li>
               <li>Reviews and photo gallery</li>
               <li>User store submission link / duplicate handling</li>
+              <li>Moderated edits and community contributions</li>
             </ul>
+          </div>
+
+          <div className={`${styles.panel} ${styles.spanTwo}`}>
+            <div className={styles.panelHeader}>
+              <h2>Reviews</h2>
+              <Link href={`/api/stores/${store.slug}/reviews`} className={styles.inlineLink}>
+                API placeholder
+              </Link>
+            </div>
+            <p className={styles.panelText}>
+              Reviews are not enabled yet. The endpoint is in place and currently returns an empty
+              list so we can build the UI shell before adding the reviews table and write APIs.
+            </p>
           </div>
         </section>
       </div>

@@ -41,6 +41,34 @@
   line-height: 1.45;
 }
 
+.heroActions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.primaryAction {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #8b4f2f;
+  color: #fbf7f2;
+  font-weight: 700;
+}
+
+.primaryAction:hover {
+  text-decoration: none;
+  background: #734127;
+}
+
+.actionHint {
+  color: #594d43;
+  font-size: 13px;
+}
+
 .searchForm {
   margin-top: 22px;
   display: grid;

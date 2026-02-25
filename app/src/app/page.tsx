@@ -59,6 +59,13 @@ export default async function Home({ searchParams }: HomePageProps) {
           curated and user-submitted listings.
         </p>
 
+        <div className={styles.heroActions}>
+          <Link href="/submit-store" className={styles.primaryAction}>
+            Submit a store
+          </Link>
+          <span className={styles.actionHint}>New submissions are saved for admin review.</span>
+        </div>
+
         <form className={styles.searchForm} method="get">
           <label className={styles.field}>
             <span>Search</span>
