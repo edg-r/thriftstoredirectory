@@ -1,0 +1,276 @@
+.page {
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(30, 111, 92, 0.1), transparent 35%),
+    radial-gradient(circle at 95% 5%, rgba(255, 150, 80, 0.12), transparent 35%),
+    #f4efe6;
+  color: #1f1a17;
+}
+
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  padding: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #7f5a3c;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
+  line-height: 1;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  color: #54493f;
+  line-height: 1.45;
+}
+
+.headerLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.headerLinks a {
+  color: #1f5a4d;
+  font-weight: 600;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  padding: 12px 14px;
+}
+
+.toolbar label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4f4035;
+}
+
+.toolbar select,
+.toolbar button {
+  border-radius: 10px;
+  border: 1px solid #d5c9bc;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.toolbar button {
+  background: #1e6f5c;
+  color: #f7f4f0;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.empty,
+.errorBox {
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px dashed rgba(31, 26, 23, 0.16);
+}
+
+.errorBox {
+  border-style: solid;
+  border-color: #d18a8a;
+  color: #7c2424;
+}
+
+.card {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  padding: 14px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.cardHeader h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.address {
+  margin: 8px 0 0;
+  color: #5f544c;
+  font-size: 14px;
+}
+
+.badges {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.badge,
+.badgeMuted {
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+}
+
+.badge {
+  background: #efe6da;
+  color: #6a4d37;
+}
+
+.badgeMuted {
+  background: #eff4f2;
+  color: #46685d;
+}
+
+.metaGrid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metaGrid p {
+  margin: 0;
+  color: #4e433b;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.metaGrid a {
+  color: #1f5a4d;
+}
+
+.notes {
+  margin: 10px 0 0;
+  color: #4e433b;
+  background: #faf7f2;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.duplicateBox {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #edf5f2;
+  border: 1px solid #d5e8e3;
+  color: #295f53;
+}
+
+.duplicateBox a {
+  color: #1f5a4d;
+  font-weight: 700;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions button {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: #1e6f5c;
+  color: #f7f4f0;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.actions .secondary {
+  background: #73533e;
+}
+
+.resultPanel {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(31, 26, 23, 0.08);
+  padding: 14px;
+}
+
+.resultPanel h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.resultPanel pre {
+  margin: 10px 0 0;
+  border-radius: 12px;
+  background: #1c1a19;
+  color: #efeae3;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-x: auto;
+}
+
+@media (max-width: 800px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .headerLinks {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+  }
+
+  .badges {
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .metaGrid {
+    grid-template-columns: 1fr;
+  }
+}
