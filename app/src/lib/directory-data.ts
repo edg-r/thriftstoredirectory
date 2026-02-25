@@ -25,8 +25,8 @@ export type StoreListItem = {
 export type StoreListQuery = {
   q?: string;
   city?: string;
-  category?: string;
-  priceTier?: "BUDGET" | "MID" | "PREMIUM";
+  categories?: string[];
+  priceTiers?: Array<"BUDGET" | "MID" | "PREMIUM">;
   sort?: "name_asc" | "name_desc" | "city_asc" | "city_desc";
   page?: number;
   limit?: number;
@@ -175,8 +175,8 @@ export async function getStores(query: StoreListQuery = {}): Promise<StoreListRe
   const limit = Math.min(50, Math.max(1, query.limit ?? 12));
   const q = query.q?.trim();
   const city = query.city?.trim();
-  const category = query.category?.trim();
-  const priceTier = query.priceTier;
+  const categories = [...new Set((query.categories ?? []).map((value) => value.trim()).filter(Boolean))];
+  const priceTiers = [...new Set(query.priceTiers ?? [])];
   const sort = query.sort ?? "city_asc";
   const skip = (page - 1) * limit;
 
@@ -193,16 +193,16 @@ export async function getStores(query: StoreListQuery = {}): Promise<StoreListRe
           }
         : {}),
       ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
-      ...(category
+      ...(categories.length > 0
         ? {
             categories: {
               some: {
-                category: { slug: category },
+                category: { slug: { in: categories } },
               },
             },
           }
         : {}),
-      ...(priceTier ? { priceTier } : {}),
+      ...(priceTiers.length > 0 ? { priceTier: { in: priceTiers } } : {}),
     };
 
     const orderBy: Prisma.StoreOrderByWithRelationInput[] =
@@ -268,8 +268,10 @@ export async function getStores(query: StoreListQuery = {}): Promise<StoreListRe
           .toLowerCase()
           .includes(q.toLowerCase());
       const cityMatches = !city || store.city.toLowerCase() === city.toLowerCase();
-      const categoryMatches = !category || store.categorySlugs.includes(category);
-      const priceTierMatches = !priceTier || store.priceTier === priceTier;
+      const categoryMatches =
+        categories.length === 0 || categories.some((category) => store.categorySlugs.includes(category));
+      const priceTierMatches =
+        priceTiers.length === 0 || (store.priceTier ? priceTiers.includes(store.priceTier) : false);
 
       return qMatches && cityMatches && categoryMatches && priceTierMatches;
     });
