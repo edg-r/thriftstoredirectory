@@ -2,6 +2,29 @@
 
 MVP thrift store directory for San Diego County, built as a responsive web app first and structured to support a future iOS client using the same backend/API.
 
+## Current Status (Implemented So Far)
+
+Completed slices currently in the repo:
+
+- Next.js app scaffold (App Router + TypeScript) in `app/`
+- PostgreSQL + Prisma schema, initial migration, and seed script
+- Seeded categories and sample stores
+- Public directory UI with search/filter/sort (category, price tier, sort)
+- Public APIs: `GET /api/categories`, `GET /api/stores`, `GET /api/stores/:slug`
+- Store detail page (`/stores/:slug`)
+- Placeholder reviews API: `GET /api/stores/:slug/reviews`
+- User store submission flow (`/submit-store`) + `POST /api/store-submissions`
+- Admin store-submission moderation APIs/UI (approve/reject/merge duplicate)
+- Placeholder admin access gate (`ADMIN_ACCESS_KEY`) for admin APIs/page
+
+Not implemented yet (major items):
+
+- Google Sign-In / real user auth
+- Real reviews persistence + write APIs
+- Review photo uploads
+- Admin role system (replacing placeholder admin key)
+- Import pipeline UI/trigger
+
 ## MVP Goals
 
 - Help users find thrift stores in San Diego County.
@@ -128,26 +151,79 @@ Core tables/enums expected for MVP:
 - Basic accessibility (labels, keyboard support, alt text handling)
 - Error handling for uploads/imports
 
-## Local Development (Planned)
+## Local Development
 
-Project scaffolding is not created yet. Once implemented, this README should include:
+### Prerequisites
 
-- Prerequisites (Node.js, package manager, PostgreSQL)
-- Install steps
-- Environment variables
-- Prisma migrations and seed commands
-- Local run commands
-- Import pipeline commands
-- Deployment steps
+- Node.js 18+ (current local setup tested on Node `18.17.0`)
+- npm
+- PostgreSQL (local service)
 
-## Initial Environment Variables (Expected)
+### Install
 
-Exact names may change during implementation, but expect values for:
+```bash
+cd app
+npm install
+```
+
+### Environment Variables
+
+Copy the example file and update values as needed:
+
+```bash
+cp .env.example .env
+```
+
+Important local values:
+
+- `DATABASE_URL` (use your local Postgres user)
+- `ADMIN_ACCESS_KEY` (placeholder admin gate for `/admin/store-submissions`)
+
+### Database Setup (Prisma)
+
+Create the local database (example name from `.env.example`):
+
+```bash
+createdb thrift_store_directory
+```
+
+Run migration and seed:
+
+```bash
+npm run prisma:migrate:dev -- --name init
+npm run db:seed
+```
+
+### Run Locally
+
+```bash
+npm run dev
+```
+
+Open:
+
+- `http://localhost:3000`
+- Admin moderation page (placeholder gate): `http://localhost:3000/admin/store-submissions?adminKey=YOUR_ADMIN_ACCESS_KEY`
+
+### Useful Test Endpoints (Current)
+
+- `GET /api/categories`
+- `GET /api/stores`
+- `GET /api/stores/:slug`
+- `GET /api/stores/:slug/reviews` (placeholder)
+- `POST /api/store-submissions`
+- `GET /api/admin/store-submissions` (requires admin key header/query)
+- `PATCH /api/admin/store-submissions/:id` (requires admin key header/query)
+
+## Initial Environment Variables (Current + Expected)
+
+Current placeholders/config (some used now, some later):
 
 - Database connection (`DATABASE_URL`)
 - Auth secret (`AUTH_SECRET` / `NEXTAUTH_SECRET`)
 - Google OAuth client id/secret
 - App URL (`NEXTAUTH_URL` or equivalent)
+- Placeholder admin gate (`ADMIN_ACCESS_KEY`)
 - Storage provider credentials (Supabase or Cloudinary)
 - Optional admin allowlist / role configuration
 
