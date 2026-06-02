@@ -41,6 +41,13 @@ function isLikelyPostalCode(value: string) {
   return /^\d{5}(-\d{4})?$/.test(value);
 }
 
+function normalizeWebsiteUrl(value: string | null) {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^[a-z]+:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 function normalizeForComparison(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
@@ -86,7 +93,7 @@ export async function POST(request: NextRequest) {
   const street2 = asOptionalString(body.street2);
   const postalCode = asOptionalString(body.postalCode);
   const phone = asOptionalString(body.phone);
-  const websiteUrl = asOptionalString(body.websiteUrl);
+  const websiteUrl = normalizeWebsiteUrl(asOptionalString(body.websiteUrl));
   const notes = asOptionalString(body.notes);
   const latitude = asOptionalNumber(body.latitude);
   const longitude = asOptionalNumber(body.longitude);

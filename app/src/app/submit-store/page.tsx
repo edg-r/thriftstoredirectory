@@ -19,7 +19,8 @@ export default function SubmitStorePage() {
     setSubmitting(true);
     setResult(null);
 
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
 
     try {
@@ -36,7 +37,7 @@ export default function SubmitStorePage() {
         return;
       }
 
-      event.currentTarget.reset();
+      form.reset();
       setResult({ kind: "success", data });
     } catch (error) {
       setResult({
